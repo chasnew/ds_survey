@@ -1,0 +1,81 @@
+---
+title: "Data scientist survey"
+author: "Chanuwas (New) Aswamenakul"
+output:
+  html_document:
+    df_print: paged
+---
+
+I created a survey asking data scientists to prioritize between knowing statistics and some mathematics that are more related to predictive machine learning models these days. I dropped the link to the survey on 2 Facebook groups ([Data Science BKK](https://www.facebook.com/groups/755699171268759/) and [DATA อาไยดี](https://www.facebook.com/groups/1974407749285542/)), [my Facebook timeline](https://www.facebook.com/new.chanuwas), and [my Twitter feed](https://twitter.com/chas_new) (Basically a convenient sample).
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(data.table)
+library(psych)
+library(plyr)
+library(knitr)
+library(kableExtra)
+library(formattable)
+```
+
+# Survey data
+
+**Question** If you identify yourself as a data scientist, you prioritize knowing which of the following?
+
+* Basic statistics, inferential statistics, and statistical modeling
+* Linear algebra, differential calculus, and predictive machine learning model
+* I don't see the difference
+
+```{r}
+survey_data <- fread("data/data_scientist_survey.csv", encoding = "UTF-8")
+names(survey_data)[2:3] <- c("skill", "description")
+
+from_v <- c("Basic statistics, inferential statistics, and statistical modeling",
+            "Linear algebra, differential calculus, and predictive machine learning model",
+            "I don't see the difference")
+
+to_v <- c("stat_based", "ml_based", "no_diff")
+
+survey_data <- survey_data %>%
+  mutate(skill = mapvalues(skill, from = from_v, to = to_v))
+```
+
+# Results
+
+The result in the pie plot below shows that, out of 35 responses, 18 people prioritize statistical knowledge, 11 prioritize ml-based mathematic, and 6 say either they don't see the differences or both are equally important.
+
+```{r}
+skill_data <- survey_data %>% group_by(skill) %>%
+  dplyr::summarize(skill_count = n())
+skill_data$prop <- (skill_data$skill_count/sum(skill_data$skill_count))*100
+skill_data <- skill_data %>%
+  arrange(desc(skill)) %>%
+  mutate(lab.ypos = cumsum(prop) - 0.5*prop)
+
+skill_data %>%
+  ggplot(aes(x = "", y = prop, fill = skill)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y") +
+  scale_fill_manual(values=c("#E69F00", "#999999", "#56B4E9")) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+  geom_text(aes(y = lab.ypos, label = skill_count), size=5)
+```
+
+Besides the multiple choice question, I also gives people a chance to explaing their answer. But this is optional. And below are the responses that give justifications for their answers. Some of the opinions reveal that people think that both stat-based and ml-based knowledge is crucial for data scientists (e.g. the 2 `no_diff` responses) and some think that statistics is more fundamental to the job.
+
+```{r}
+descr_data <- survey_data %>% filter(description != "") %>%
+  select(skill, description)
+descr_data %>%
+  mutate(skill = ifelse(skill == "stat_based",
+                        cell_spec(skill, color = "black", bold = T, background = "#56B4E9"),
+                        ifelse(skill == "ml_based",
+                               cell_spec(skill, color = "black", bold = T, background = "#E69F00"),
+                               cell_spec(skill, color = "black", bold = T, background = "#999999")))) %>% 
+  kable(escape = F) %>% kable_styling()
+```
+
+# Conclusion
+
+Due to too many limitations to be named, I'll refraing myself from making any strong conclusions about the study. But we can definitely see the diverse opinions about the identity of data scientists, which as far as I can imagine, originates from different training backgrounds.
