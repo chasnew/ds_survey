@@ -78,4 +78,4 @@ descr_data %>%
 
 # Conclusion
 
-Due to too many limitations to be named, I'll refraing myself from making any strong conclusions about the study. But we can definitely see the diverse opinions about the identity of data scientists, which as far as I can imagine, originates from different training backgrounds.
+Due to too many limitations to be named, I'll refraing myself from making any strong conclusions about the study. But we can definitely see the diverse opinions about the types of skills required for data scientists, which as far as I can imagine, originates from different training backgrounds. In my opinion, statistical skills are more important for explanatory studies while linear algebras and other math knowledge is more important for predictive modeling.
